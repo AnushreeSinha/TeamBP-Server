@@ -1,0 +1,15 @@
+appdirs==1.4.3
+Beaker==1.8.1
+click==6.7
+fhirclient==1.0.6
+Flask==0.12.1
+funcsigs==1.0.2
+isodate==0.5.4
+itsdangerous==0.24
+Jinja2==2.9.6
+MarkupSafe==1.0
+packaging==16.8
+pyparsing==2.2.0
+requests==2.13.0
+six==1.10.0
+Werkzeug==0.12.1
