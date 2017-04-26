@@ -10,6 +10,7 @@ import pprint
 from flask import jsonify
 import RangeChecker as rc
 import json
+import csv
 
 from flask import Flask, request, redirect, session
 
@@ -216,7 +217,34 @@ def bp():
  #   patient_id = request.form('patient_id')
  #   return patient_id
 
+@app.route('/bpsubmit', methods=['POST'])
+def bpsubmit():
+    if(request.method=='POST'):
+        jsonff = json.loads(request.data)
+        systolic = int(jsonff['systolic'])
+        diastolic = int(jsonff['diastolic'])
+        patient_id = int(jsonff['pid'])
 
+        with open('dict.csv', 'w') as csvfile:
+            fieldnames = ['patient_id', 'systolic', 'diastolic']
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+
+            writer.writeheader()
+            writer.writerow({'patient_id': patient_id, 'systolic': systolic,'diastolic': diastolic })
+    return ''
+
+@app.route('/getfordoc')
+def getfordoc():
+    mydict = {}
+    with open('dict.csv') as csvfile:
+        reader = csv.DictReader(csvfile)
+
+        for row in reader:
+            mydict['patient_id'] = row['patient_id']
+            mydict['systolic'] = row['systolic']
+            mydict['diastolic'] = row['diastolic']
+    jsonarray = json.dumps(mydict)
+    return jsonarray
 
 
 
