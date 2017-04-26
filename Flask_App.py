@@ -164,10 +164,20 @@ def after_token2():
     name = smart.patient.name
     birthDate = smart.patient.birthDate
     gender = smart.patient.gender
-    # get all the observation resource in the category 'vital-signs' for this patient in a list called vitals
-    vitals = [x[0].resource for x in iterentries('Observation?patient='+ id +'&category=vital-signs&_format=json',smart)]
+    # get all the observation resource in the category 'vital-signs' for this patient in a list of observation resources called vitals
+    vitals = [result[0].resource for result in iterentries('Observation?patient='+ id +'&category=vital-signs&_format=json',smart)]
     body = smart.human_name(smart.patient.name[0] if smart.patient.name and len(smart.patient.name) > 0 else 'Unknown')
-    body += str(vitals[0].as_json())
+    for vital in vitals:
+        edtiso = vital.effectiveDateTime.isostring
+        if vital.component:
+            comps = vital.component
+        else:
+            comps = [vital]
+        for comp in comps:
+            body += ('<br>'+ edtiso +' : ' +
+                    comp.code.coding[0].display +' : ' +
+                    str(comp.valueQuantity.value) +' : ' +
+                    comp.valueQuantity.unit)
     return body
 
 
