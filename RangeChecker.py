@@ -4,12 +4,14 @@ from get_percentile import get_percentile as gp
 
 # assuming age in years, height in cms, gender as male or female, BP readings in mmHg
 def check_bp(height, age, gender, systolic, diastolic):
-    patient_data = {"age":age, "height":height/100, "sex":gender, "systolic":systolic, "diastolic":diastolic}
+    patient_data = {"age": age, "height": height / 100, "sex": gender, "systolic": systolic, "diastolic": diastolic}
     percentiles = gp.bp_percentiles(patient_data)
-
-    if percentiles['systolic']>=95 or percentiles['diastolic']>=95:
+    percentiles['systolic'] = float("{0:.2f}".format(percentiles['systolic']))
+    percentiles['diastolic'] = float("{0:.2f}".format(percentiles['diastolic']))
+    print(percentiles)
+    if percentiles['systolic'] >= 95 or percentiles['diastolic'] >= 95:
         percentiles['bpstatus'] = 'hypertension'
-    elif percentiles['systolic']>=90 or percentiles['diastolic']>=90:
+    elif percentiles['systolic'] >= 90 or percentiles['diastolic'] >= 90:
         percentiles['bpstatus'] = 'prehypertension'
     else:
         percentiles['bpstatus'] = 'normal'
