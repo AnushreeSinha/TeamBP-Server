@@ -16,7 +16,18 @@ def check_bp(height, age, gender, systolic, diastolic):
     else:
         percentiles['bpstatus'] = 'normal'
 
-    return percentiles
+    toReturn = {}
+    toReturn['systolic'] = percentiles['systolic']
+    toReturn['diastolic'] = percentiles['diastolic']
+    toReturn['bpstatus'] = percentiles['bpstatus']
+
+    if toReturn['bpstatus'] != 'normal':
+        toReturn['cards'] = getCards()
+    else:
+        toReturn['cards'] = []
+
+    #print toReturn
+    return toReturn
 
 def getCards():
     card1 = '''Is the patient fully rested?
@@ -25,10 +36,10 @@ def getCards():
     card2 = 'Do they have the right size cuff on? Please ensure that you are using the proper equipment.'
     card3 = 'Please wait for 5/10 minutes in between each blood pressure reading.'
 
-    data = {}
-    data['card1'] = card1
-    data['card2'] = card2
-    data['card3'] = card3
+    data = []
+    data.append(card1)
+    data.append(card2)
+    data.append(card3)
     json_data = json.dumps(data)
 
     return json_data
