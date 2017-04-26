@@ -8,6 +8,8 @@ from fhirclient.models.observation import Observation
 import fhirclient.models.bundle as b
 import pprint
 from flask import jsonify
+import RangeChecker as rc
+import json
 
 from flask import Flask, request, redirect, session
 
@@ -198,18 +200,21 @@ def reset():
 
 @app.route('/bp')
 def bp():
-    age = request.args.get('age')
-    height = request.args.get('height')
-    gender = request.args.get('gender')
-    systolic = request.args.get('systolic')
-    diastolic = request.args.get('diastolic')
-    return jsonify(gender)
+    age = int(request.args.get('age'))
+    height = int(request.args.get('height'))
+    gender = request.args.get('gender').encode('utf-8')
+    systolic = int(request.args.get('systolic'))
+    diastolic = int(request.args.get('diastolic'))
+    percentiles = rc.check_bp(height, age, gender, systolic, diastolic)
+    jsonarray = json.dumps(percentiles)
+    return jsonarray
 
-@app.route('/bpreadings', method=['POST'])
-def bpreadings():
-    newdiastolic = request.form('diastolic')
-    newsystolic = request.form('systolic')
-    patient_id = request.form('patient_id')
+#@app.route('/bpreadings', method=['POST'])
+#def bpreadings():
+ #   newdiastolic = request.form('diastolic')
+ #   newsystolic = request.form('systolic')
+ #   patient_id = request.form('patient_id')
+ #   return patient_id
 
 
 
