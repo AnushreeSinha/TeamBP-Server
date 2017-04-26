@@ -85,7 +85,7 @@ def _med_name(prescription):
     return "Unnamed Medication(TM)"
 
 def _vitals_iterator(smart):
-    return iterentries('Observation?patient='+pat.resource.id+'&category=vital-signs&_format=json',smart)
+    return iterentries('Observation?patient='+smart.patient.resource.id+'&category=vital-signs&_format=json',smart)
 
 
 # views

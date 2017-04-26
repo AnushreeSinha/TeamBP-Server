@@ -16,7 +16,12 @@ def check_bp(height, age, gender, systolic, diastolic):
     else:
         percentiles['bpstatus'] = 'normal'
 
-    return percentiles
+    toReturn = {}
+    toReturn['systolic'] = percentiles['systolic']
+    toReturn['diastolic'] = percentiles['diastolic']
+    toReturn['bpstatus'] = percentiles['bpstatus']
+
+    return toReturn
 
 def getCards():
     card1 = '''Is the patient fully rested?
