@@ -7,6 +7,7 @@ from fhirclient.models.medicationorder import MedicationOrder
 from fhirclient.models.observation import Observation
 import fhirclient.models.bundle as b
 import pprint
+from flask import jsonify
 
 from flask import Flask, request, redirect, session
 
@@ -184,6 +185,26 @@ def logout():
 def reset():
     _reset()
     return redirect('/')
+
+@app.route('/bp')
+def bp():
+    age = request.args.get('age')
+    height = request.args.get('height')
+    gender = request.args.get('gender')
+    systolic = request.args.get('systolic')
+    diastolic = request.args.get('diastolic')
+    return jsonify(gender)
+
+@app.route('/bpreadings', method=['POST'])
+def bpreadings():
+    newdiastolic = request.form('diastolic')
+    newsystolic = request.form('systolic')
+    patient_id = request.form('patient_id')
+
+
+
+
+
 
 
 # start the app
