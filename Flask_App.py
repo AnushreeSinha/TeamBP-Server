@@ -209,6 +209,12 @@ def bp():
     jsonarray = json.dumps(percentiles)
     return jsonarray
 
+@app.route('/cards')
+def cards():
+    cards = rc.getCards()
+    jsonarray2 = json.dumps(cards)
+    return jsonarray2
+
 #@app.route('/bpreadings', method=['POST'])
 #def bpreadings():
  #   newdiastolic = request.form('diastolic')
