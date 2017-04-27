@@ -13,6 +13,7 @@ import pprint
 from flask import jsonify
 import RangeChecker as rc
 import json
+import csv
 
 from flask import Flask, request, redirect, session, send_from_directory, Response
 
@@ -89,7 +90,7 @@ def _med_name(prescription):
     return "Unnamed Medication(TM)"
 
 def _vitals_iterator(smart):
-    return iterentries('Observation?patient='+smart.patient.resource.id+'&category=vital-signs&_format=json',smart)
+    return iterentries('Observation?patient='+pat.resource.id+'&category=vital-signs&_format=json',smart)
 
 
 # views
@@ -217,7 +218,6 @@ def bp():
     jsonarray = json.dumps(percentiles)
     return jsonarray
 
-
 #@app.route('/bpreadings', method=['POST'])
 #def bpreadings():
  #   newdiastolic = request.form('diastolic')
@@ -264,6 +264,35 @@ def get_observations():
 @app.route('/<path:path>')
 def serve_page(path):
     return send_from_directory('www', path)
+
+@app.route('/bpsubmit', methods=['POST'])
+def bpsubmit():
+    if(request.method=='POST'):
+        jsonff = json.loads(request.data)
+        systolic = int(jsonff['systolic'])
+        diastolic = int(jsonff['diastolic'])
+        patient_id = int(jsonff['pid'])
+
+        with open('dict.csv', 'w') as csvfile:
+            fieldnames = ['patient_id', 'systolic', 'diastolic']
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+
+            writer.writeheader()
+            writer.writerow({'patient_id': patient_id, 'systolic': systolic,'diastolic': diastolic })
+    return ''
+
+@app.route('/getfordoc')
+def getfordoc():
+    mydict = {}
+    with open('dict.csv') as csvfile:
+        reader = csv.DictReader(csvfile)
+
+        for row in reader:
+            mydict['patient_id'] = row['patient_id']
+            mydict['systolic'] = row['systolic']
+            mydict['diastolic'] = row['diastolic']
+    jsonarray = json.dumps(mydict)
+    return jsonarray
 
 
 
