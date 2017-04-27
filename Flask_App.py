@@ -6,13 +6,17 @@ from fhirclient.models.medication import Medication
 from fhirclient.models.medicationorder import MedicationOrder
 from fhirclient.models.observation import Observation
 import fhirclient.models.bundle as b
+
+import fhirclient.models.patient as p
+from flask_cors import CORS, cross_origin
 import pprint
 from flask import jsonify
 import RangeChecker as rc
 import json
 
-from flask import Flask, request, redirect, session
+from flask import Flask, request, redirect, session, send_from_directory, Response
 
+mysmart = ''
 def iterentries(qry,smart):
     """ Generator to provide the entries in a paged bundle. Hides the
         process of pages being passed.
@@ -47,7 +51,7 @@ smart_defaults = {
     'redirect_uri': 'http://localhost:8000/fhir-app/'
 }
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder="www")
 
 def _save_state(state):
     session['state'] = state
@@ -120,13 +124,26 @@ def launchdoc():
               'api_base': request.args['iss'],
               'launch_token': request.args['launch'],
               'app_id': 'e6b67cc5-200e-4264-b8ad-980b3e32abda',
-              'redirect_uri': 'http://localhost:8000/fhir-app/after_token2'
+              'redirect_uri': 'http://localhost:8000/fhir-app/doctor'
+              }
+    smart = _get_smart(settings)
+    return redirect(smart.authorize_url)
+
+@app.route('/launchnurse.html')
+def launchnurse():
+    _reset()
+    settings = {
+              'api_base': request.args['iss'],
+              'launch_token': request.args['launch'],
+              'app_id': 'ec6df8f5-f1e8-4fff-93b8-7c0af18d7980',
+              'redirect_uri': 'http://localhost:8000/fhir-app/nurse'
               }
     smart = _get_smart(settings)
     return redirect(smart.authorize_url)
 
 @app.route('/fhir-app/after_token')
-@app.route('/fhir-app/after_token2')
+@app.route('/fhir-app/nurse')
+@app.route('/fhir-app/doctor')
 def callback():
     """ OAuth2 callback interception.
         Gets a token
@@ -159,30 +176,21 @@ def after_token():
     body += """<p><a href="/logout">Change patient</a></p>"""
     return body
 
-@app.route('/after_token2')
-def after_token2():
+@app.route('/nurse')
+def nurse_page():
     smart = _get_smart()
-    id = smart.patient.id
-    name = smart.patient.name
-    birthDate = smart.patient.birthDate
-    gender = smart.patient.gender
-    # get all the observation resource in the category 'vital-signs' for this patient in a list of observation resources called vitals
-    vitals = [result[0].resource for result in iterentries('Observation?patient='+ id +'&category=vital-signs&_format=json',smart)]
-    body = smart.human_name(smart.patient.name[0] if smart.patient.name and len(smart.patient.name) > 0 else 'Unknown')
-    for vital in vitals:
-        edtiso = vital.effectiveDateTime.isostring
-        if vital.component:
-            comps = vital.component
-        else:
-            comps = [vital]
-        for comp in comps:
-            body += ('<br>'+ edtiso +' : ' +
-                    comp.code.coding[0].display +' : ' +
-                    str(comp.valueQuantity.value) +' : ' +
-                    comp.valueQuantity.unit)
-    return body
+    # return redirect('after_token.html')
+    global mysmart
+    mysmart = _get_smart()
+    return redirect('/www/index.html')
 
-
+@app.route('/doctor')
+def doctor_page():
+    smart = _get_smart()
+    # return redirect('after_token.html')
+    global mysmart
+    mysmart = _get_smart()
+    return redirect('/www/index.html')
 
 
 
@@ -218,6 +226,44 @@ def bp():
  #   return patient_id
 
 
+@app.route('/get_user')
+def get_user():
+    smart = mysmart
+    res = {}
+    res['name'] =smart.human_name(smart.patient.name[0] if smart.patient.name and len(smart.patient.name) > 0 else 'Unknown')
+    res['dob'] = (smart.patient.birthDate.isostring)
+    res['pid'] = smart.patient.id
+    res['gender'] = smart.patient.gender
+
+    return json.dumps(res)
+
+@app.route('/get_observations')
+def get_observations():
+    smart = _get_smart()
+    id = smart.patient.id
+    vitals = [x[0].resource for x in
+              iterentries('Observation?patient=' + id + '&category=vital-signs&_format=json', smart)]
+    obs = {}
+    bp = []
+    bmi = []
+    for v in vitals:
+        reading = {}
+        if v.code.text == 'bmi':
+            bmi.append({'bmi':v.valueQuantity.value,'date':v.effectiveDateTime.isostring})
+
+        if v.component:
+            if len(v.component) == 2:
+                reading['systolic'] = v.component[0].valueQuantity.value
+                reading['diastolic'] = v.component[1].valueQuantity.value
+                reading['date'] = v.effectiveDateTime.isostring
+                bp.append(reading)
+    obs['bp'] = bp
+    obs['bmi'] = bmi
+    return json.dumps(obs)
+
+@app.route('/<path:path>')
+def serve_page(path):
+    return send_from_directory('www', path)
 
 
 

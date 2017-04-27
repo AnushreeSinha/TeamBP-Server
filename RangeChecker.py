@@ -10,11 +10,11 @@ def check_bp(height, age, gender, systolic, diastolic):
     percentiles['diastolic'] = float("{0:.2f}".format(percentiles['diastolic']))
     print(percentiles)
     if percentiles['systolic'] >= 95 or percentiles['diastolic'] >= 95:
-        percentiles['bpstatus'] = 'hypertension'
+        percentiles['bpstatus'] = 'Hypertension'
     elif percentiles['systolic'] >= 90 or percentiles['diastolic'] >= 90:
-        percentiles['bpstatus'] = 'prehypertension'
+        percentiles['bpstatus'] = 'Prehypertension'
     else:
-        percentiles['bpstatus'] = 'normal'
+        percentiles['bpstatus'] = 'Normal'
 
     toReturn = {}
     toReturn['systolic'] = percentiles['systolic']
