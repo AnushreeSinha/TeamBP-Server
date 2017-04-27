@@ -1,2 +1,2 @@
-patient_id,systolic,diastolic
-88,67,88
+patient_id,systolic,diastolic,height,weight
+SMART-1288992,140,80,150,150

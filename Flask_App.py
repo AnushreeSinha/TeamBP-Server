@@ -183,7 +183,7 @@ def nurse_page():
     # return redirect('after_token.html')
     global mysmart
     mysmart = _get_smart()
-    return redirect('/www/index.html')
+    return redirect('/www/nurse/index.html')
 
 @app.route('/doctor')
 def doctor_page():
@@ -191,7 +191,7 @@ def doctor_page():
     # return redirect('after_token.html')
     global mysmart
     mysmart = _get_smart()
-    return redirect('/www/index.html')
+    return redirect('/www/doctor/index.html')
 
 
 
@@ -244,6 +244,11 @@ def get_observations():
     vitals = [x[0].resource for x in
               iterentries('Observation?patient=' + id + '&category=vital-signs&_format=json', smart)]
     obs = {}
+    obs['name'] = smart.human_name(
+        smart.patient.name[0] if smart.patient.name and len(smart.patient.name) > 0 else 'Unknown')
+    obs['dob'] = (smart.patient.birthDate.isostring)
+    obs['pid'] = smart.patient.id
+    obs['gender'] = smart.patient.gender
     bp = []
     bmi = []
     for v in vitals:
@@ -259,6 +264,16 @@ def get_observations():
                 bp.append(reading)
     obs['bp'] = bp
     obs['bmi'] = bmi
+    mydict = {}
+    with open('dict.csv') as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            if row['patient_id'] != id:
+                continue
+            obs['systolic'] = row['systolic']
+            obs['diastolic'] = row['diastolic']
+            obs['height'] = row['height']
+            obs['weight'] = row ['weight']
     return json.dumps(obs)
 
 @app.route('/<path:path>')
@@ -271,14 +286,16 @@ def bpsubmit():
         jsonff = json.loads(request.data)
         systolic = int(jsonff['systolic'])
         diastolic = int(jsonff['diastolic'])
-        patient_id = int(jsonff['pid'])
+        height = int(jsonff['height'])
+        weight = int(jsonff['weight'])
+        patient_id = (jsonff['pid'])
 
         with open('dict.csv', 'w') as csvfile:
-            fieldnames = ['patient_id', 'systolic', 'diastolic']
+            fieldnames = ['patient_id', 'systolic', 'diastolic','height','weight']
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 
             writer.writeheader()
-            writer.writerow({'patient_id': patient_id, 'systolic': systolic,'diastolic': diastolic })
+            writer.writerow({'patient_id': patient_id, 'systolic': systolic,'diastolic': diastolic,'height':height, 'weight':weight })
     return ''
 
 @app.route('/getfordoc')
