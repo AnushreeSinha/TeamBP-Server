@@ -274,6 +274,11 @@ def get_observations():
             obs['diastolic'] = row['diastolic']
             obs['height'] = row['height']
             obs['weight'] = row ['weight']
+    percentiles = rc.check_bp(int(obs['height']), int('16'), obs['gender'], int(obs['systolic']), int(obs['diastolic']))
+    obs['systolic_p'] = percentiles['systolic']
+    obs['diastolic_p'] = percentiles['diastolic']
+    obs['bpstatus'] = percentiles['bpstatus']
+    obs['age'] = '16'
     return json.dumps(obs)
 
 @app.route('/<path:path>')

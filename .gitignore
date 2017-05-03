@@ -1,3 +1,4 @@
 myapp.log
 session_data
 *.pyc
+venv/
